@@ -1,6 +1,7 @@
-const {accessSecret, refreshSecret, tokenLife} = require("../config")
+const {accessSecret, refreshSecret, tokenLife, salt, refreshTokenLife} = require("../config")
 const jwt = require('jsonwebtoken');
 const db = require("../database");
+const {hash} = require("bcrypt");
 
 
 
@@ -16,8 +17,10 @@ function verifyUser(bearerToken) {
 }
 
 async function createUser(name, admin = false, login, password) {
-    const user = [name, admin, login, password]
-    // TODO: hash password
+    const hashedPassword = await hash(password, salt)
+
+    console.log(hashedPassword)
+    const user = [name, admin, login, hashedPassword]
 
     return await db.query("INSERT INTO users(name, admin, login, password) VALUES ($1, $2, $3, $4) returning *", user)
 
@@ -34,12 +37,11 @@ async function findById(id) {
 function signUser(user) {
 
     const tokenPayload = {
-        sub: user.id,
-        admin: user.admin
+        sub: user.id
     }
 
     const token = jwt.sign(tokenPayload, accessSecret, { expiresIn: tokenLife})
-    const refreshToken = jwt.sign(tokenPayload, refreshSecret, { expiresIn: tokenLife})
+    const refreshToken = jwt.sign(tokenPayload, refreshSecret, { expiresIn: refreshTokenLife})
 
     return {token: token, refreshToken: refreshToken}
 }

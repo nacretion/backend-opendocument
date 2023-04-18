@@ -2,7 +2,9 @@
   "PORT": 5000,
   "accessSecret": "some-secret-shit-goes-here",
   "refreshSecret": "some-secret-refresh-token-shit",
-  "tokenLife": "1h",
+  "salt": 12,
+  "tokenLife": "15m",
+  "refreshTokenLife": "7d",
 
   "dbName": "opendocument",
   "dbUser": "postgres",
