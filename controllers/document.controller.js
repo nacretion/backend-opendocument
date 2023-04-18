@@ -1,5 +1,5 @@
-const {signUser, verifyUser, verifyToken} = require("../utils/user");
-const {removeFile} = require("../utils/file");
+const {signUser, verifyUser, verifyToken, getId} = require("../utils/user");
+const {removeFile, saveFile} = require("../utils/file");
 
 class DocumentController {
 
@@ -55,7 +55,34 @@ class DocumentController {
                 });
             }
 
+            let userId = 0;
 
+            if (verified.accessToken) {
+                userId = await getId(verified.accessToken)
+            } else {
+                userId = await getId(verified.newAccessToken)
+            }
+            console.log(file.mimetype, file.size, file.originalname, file.filename, "./uploads/", description, userId)
+            const newFile = await saveFile(file, description, userId)
+
+            if (!newFile) {
+
+                return verified.accessToken?
+                    response.status(400)
+                        .cookie("refreshToken", verified.refreshToken)
+                        .json({
+                            message: "Ошибка сохранения файла",
+                            newAccessToken: verified.accessToken
+                        })
+
+                    : response.status(400)
+                        .cookie("refreshToken", verified.newRefreshToken)
+                        .json({
+                            message: "Ошибка сохранения файла",
+                            newAccessToken: verified.newAccessToken
+                        })
+            }
+            console.log(newFile)
 
 
             return verified.accessToken?

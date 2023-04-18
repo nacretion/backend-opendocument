@@ -34,6 +34,15 @@ async function renewToken(refreshToken) {
     });
 }
 
+async function getId(token) {
+    return jwt.verify(token, accessSecret, (err, decoded) => {
+        if (err) {
+            return undefined
+        }
+        return decoded.sub
+    });
+}
+
 async function verifyUser(accessToken, refreshToken) {
 
     // if access token valid - return new access token, else renew token
@@ -67,4 +76,4 @@ function signUser(user) {
     return {token: token, refreshToken: refreshToken}
 }
 
-module.exports = {signUser, createUser, findByLogin, verifyUser, renewToken}
+module.exports = {signUser, createUser, findByLogin, verifyUser, renewToken, getId}
