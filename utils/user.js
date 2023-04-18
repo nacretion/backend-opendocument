@@ -5,17 +5,6 @@ const {hash} = require("bcrypt");
 
 
 
-function verifyUser(bearerToken) {
-    const token = bearerToken.split(' ')[1]
-
-    const decoded = jwt.decode(token, accessSecret)
-
-    console.log(decoded)
-    if (!decoded) return undefined;
-
-    // verifying feature
-}
-
 async function createUser(name, admin = false, login, password) {
     const hashedPassword = await hash(password, salt)
 
@@ -29,10 +18,39 @@ async function createUser(name, admin = false, login, password) {
 async function findByLogin(login) {
     return await db.query("select * from users where login = $1", [login])
 }
+
 async function findById(id) {
     return await db.query("select * from users where id = $1", [id])
 }
 
+async function renewToken(refreshToken) {
+    // if refresh token valid - create new access + refresh token
+    return jwt.verify(refreshToken, refreshSecret, (err, decoded) => {
+        if (err) return undefined;
+        const newAccessToken =  jwt.sign({id: decoded.id}, accessSecret, {expiresIn: tokenLife})
+        const newRefreshToken =  jwt.sign({id: decoded.id}, refreshSecret, {expiresIn: refreshTokenLife})
+
+        return {newAccessToken, newRefreshToken}
+    });
+}
+
+async function verifyUser(accessToken, refreshToken) {
+
+    // if access token valid - return new access token, else renew token
+
+    const accessValid = jwt.verify(accessToken, accessSecret, (err, decoded) => {
+        if (err) return undefined
+        return decoded.id
+    });
+
+    if (accessValid) return accessToken
+
+    const newToken = await renewToken(refreshToken)
+
+    if (!newToken) return undefined
+    return newToken
+
+}
 
 function signUser(user) {
 
@@ -40,10 +58,10 @@ function signUser(user) {
         sub: user.id
     }
 
-    const token = jwt.sign(tokenPayload, accessSecret, { expiresIn: tokenLife})
-    const refreshToken = jwt.sign(tokenPayload, refreshSecret, { expiresIn: refreshTokenLife})
+    const token = jwt.sign(tokenPayload, accessSecret, {expiresIn: tokenLife})
+    const refreshToken = jwt.sign(tokenPayload, refreshSecret, {expiresIn: refreshTokenLife})
 
     return {token: token, refreshToken: refreshToken}
 }
 
-module.exports = {verifyUser, signUser, createUser, findByLogin}
+module.exports = {signUser, createUser, findByLogin, verifyUser, renewToken}

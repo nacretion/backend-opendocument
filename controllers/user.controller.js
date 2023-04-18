@@ -30,7 +30,6 @@ class UserController {
             console.log(tokens)
             response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token})
 
-            // signUser({id: 0, name: "nacretion", admin: false})
         }
         catch (e) {
             response.status(500).json({message: "Something went wrong. Try again."})
@@ -61,7 +60,6 @@ class UserController {
 
             response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token})
 
-            // signUser({id: 0, name: "nacretion", admin: false})
         }
         catch (e) {
             response.status(500).json({message: "Something went wrong. Try again."})

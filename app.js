@@ -2,6 +2,7 @@
 const express = require("express")
 const cors = require('cors')
 const multer = require("multer")
+const cookieParser = require('cookie-parser');
 
 const documentRouter = require("./routes/document.routes")
 const userRouter = require("./routes/user.routes")
@@ -9,7 +10,7 @@ const userRouter = require("./routes/user.routes")
 const {PORT} = require("./config");
 const app = express()
 
-storage = multer.diskStorage({
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/')
     },
@@ -21,8 +22,9 @@ storage = multer.diskStorage({
 })
 
 const upload = multer({storage: storage})
-app.use(upload.any())
 
+app.use(upload.any())
+app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(express.static('client'))
