@@ -1,7 +1,13 @@
 {
   "PORT": 5000,
-  "dbName": "opendocument",
   "accessSecret": "some-secret-shit-goes-here",
   "refreshSecret": "some-secret-refresh-token-shit",
-  "tokenLife": "1h"
+  "tokenLife": "1h",
+
+  "dbName": "opendocument",
+  "dbUser": "postgres",
+  "dbPassword": "root",
+  "dbHost": "localhost",
+  "dbPort": 5432
+
 }

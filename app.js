@@ -4,6 +4,7 @@ const cors = require('cors')
 const multer = require("multer")
 
 const documentRouter = require("./routes/document.routes")
+const userRouter = require("./routes/user.routes")
 
 const {PORT} = require("./config");
 const app = express()
@@ -32,5 +33,6 @@ app.use(cors(corsOptions))
 
 
 app.use('/api', documentRouter)
+app.use('/api', userRouter)
 
 app.listen(PORT, () => console.log("started successfully on port", PORT))

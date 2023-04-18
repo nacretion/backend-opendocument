@@ -1,24 +1,25 @@
 const Pool = require("pg").Pool
-const {dbName} = require('./config')
-export class Database {
+const {dbName, dbHost, dbUser, dbPassword, dbPort} = require('./config')
+class Database {
     static pool;
 
-    static async connect() {
+    async connect() {
         if (!Database.pool) {
             Database.pool = new Pool({
-                host: 'localhost',
-                user: 'postgres',
-                password: 'root',
+                host: dbHost,
+                user: dbUser,
+                password: dbPassword,
                 database: dbName,
-                port: 5432
+                port: dbPort
             });
         }
     }
 
-    static query(text, params) {
-        Database.connect()
+    query(text, params) {
+        this.connect()
         return Database.pool.query(text, params);
     }
 
 
 }
+module.exports = new Database()

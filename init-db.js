@@ -1,32 +1,44 @@
-const {dbName} = require('./config')
+
+const {dbName, dbHost, dbUser, dbPassword, dbPort} = require('./config')
+
 const Pool = require('pg').Pool
 
-const userTableQuery = 'create table if not exists user(id serial primary key, name integer not null, subordinate_id integer not null);'
+const userTableQuery = 'create table if not exists users(id serial primary key, name text not null, admin boolean default false, login text not null unique, password text not null);'
 
 
 const connection = new Pool({
-    host: 'localhost',
-    user: 'postgres',
-    password: 'root',
-    port: 5432
+    host: dbHost,
+    user: dbUser,
+    password: dbPassword,
+    port: dbPort
 });
 
-connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`, function (error, results) {
+connection.query(`DROP DATABASE ${dbName}`, (error, results) => {
     if (error) throw error;
 
-    console.log('Database created successfully');
+    console.log("Database deleted successfully")
 
-    connection.query(`USE ${dbName}`, function (error, results) {
+    connection.query(`CREATE DATABASE ${dbName}`, function (error, results) {
         if (error) throw error;
 
-        console.log(`Using database: ${dbName}`);
+        console.log('Database created successfully');
 
-        connection.query(userTableQuery, function (error, results) {
+        const newConnection = new Pool({
+            host: dbHost,
+            user: dbUser,
+            password: dbPassword,
+            database: dbName,
+            port: dbPort
+        })
+        console.log(`Using database: "${dbName}"`);
+
+        newConnection.query(userTableQuery, function (error, results) {
             if (error) throw error;
 
-            console.log('Table created successfully');
+            console.log('Table "users" created successfully');
 
+            newConnection.end();
             connection.end();
         });
     });
-});
+})
