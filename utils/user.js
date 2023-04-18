@@ -27,8 +27,8 @@ async function renewToken(refreshToken) {
     // if refresh token valid - create new access + refresh token
     return jwt.verify(refreshToken, refreshSecret, (err, decoded) => {
         if (err) return undefined;
-        const newAccessToken =  jwt.sign({id: decoded.id}, accessSecret, {expiresIn: tokenLife})
-        const newRefreshToken =  jwt.sign({id: decoded.id}, refreshSecret, {expiresIn: refreshTokenLife})
+        const newAccessToken =  jwt.sign({id: decoded.sub}, accessSecret, {expiresIn: tokenLife})
+        const newRefreshToken =  jwt.sign({id: decoded.sub}, refreshSecret, {expiresIn: refreshTokenLife})
 
         return {newAccessToken, newRefreshToken}
     });
@@ -38,12 +38,15 @@ async function verifyUser(accessToken, refreshToken) {
 
     // if access token valid - return new access token, else renew token
 
-    const accessValid = jwt.verify(accessToken, accessSecret, (err, decoded) => {
-        if (err) return undefined
-        return decoded.id
+    const accessValid = await jwt.verify(accessToken, accessSecret, (err, decoded) => {
+        if (err) {
+            return undefined
+        }
+        return decoded
     });
 
-    if (accessValid) return accessToken
+    console.log(accessValid)
+    if (accessValid) return {accessToken, refreshToken}
 
     const newToken = await renewToken(refreshToken)
 

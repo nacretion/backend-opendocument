@@ -1,4 +1,5 @@
 const {signUser, verifyUser, verifyToken} = require("../utils/user");
+const {removeFile} = require("../utils/file");
 
 class DocumentController {
 
@@ -18,15 +19,14 @@ class DocumentController {
 
             if (!verified) {
                 return response.status(401).json({
-                    message: 'Ошибка аутентификации: отсутствует токен'
+                    message: 'Ошибка аутентификации: токен недействителен'
                 });
             }
-            console.log(verified)
 
             const files = request.files
             if (!files) {
                 return response.status(400).json({
-                    message: 'Ошибка проверки содержимого тела запроса: отсутствует поле template'
+                    message: 'Ошибка проверки содержимого тела запроса: отсутствует  файл'
                 });
             }
 
@@ -34,14 +34,22 @@ class DocumentController {
             const file = files[0]
 
             if (file.mimetype !== 'application/vnd.oasis.opendocument.text') {
+                removeFile(file.filename)
                 return response.status(400).json({
                     message: 'Ошибка проверки содержимого тела запроса: неверный тип MIME файла'
+                });
+            }
+            if (file.length === 0) {
+                removeFile(file.filename)
+                return response.status(400).json({
+                    message: 'Ошибка проверки содержимого тела запроса: пустой файл'
                 });
             }
 
             const description = request.body.description
 
             if (!description || description.length < 5 || description.length > 255) {
+                removeFile(file.filename)
                 return response.status(400).json({
                     message: 'Ошибка проверки содержимого тела запроса: отсутствует поле description или его длина некорректна'
                 });
@@ -50,9 +58,18 @@ class DocumentController {
 
 
 
+            return verified.accessToken?
+                response.status(200)
+                    .cookie("refreshToken", verified.refreshToken)
+                    .json({
+                        newAccessToken: verified.accessToken
+                    })
 
-
-            response.status(200).cookie("refreshToken", verified.newRefreshToken).json({newAccessToken: verified.newAccessToken})
+                : response.status(200)
+                    .cookie("refreshToken", verified.newRefreshToken)
+                    .json({
+                        newAccessToken: verified.newAccessToken
+                    })
         }
         catch (e) {
             console.log(e)
