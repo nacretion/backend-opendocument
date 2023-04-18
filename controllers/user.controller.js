@@ -1,9 +1,10 @@
-const {signUser, verifyUser, createUser, findByLogin} = require("../utils/user");
+const {signUser, verifyUser, createUser, findByLogin, authUser} = require("../utils/user");
+const {compare} = require("bcrypt");
 
 
 class UserController {
 
-    async createUser(request, response) {
+    async create(request, response) {
         try {
             const {name, admin, login, password} = request.body
 
@@ -32,7 +33,37 @@ class UserController {
             // signUser({id: 0, name: "nacretion", admin: false})
         }
         catch (e) {
-            console.log(e)
+            response.status(500).json({message: "Something went wrong. Try again."})
+        }
+
+    }
+    async auth(request, response) {
+        try {
+            const {login, password} = request.body
+
+            if (!login || !password) {
+                return response.status(400).json({message: "Blank fields."})
+            }
+
+            const candidate = await findByLogin(login)
+
+            if (!candidate.rows[0]) {
+                return response.status(404).json({message: "Not exists."})
+            }
+
+            if (!compare(password, candidate.rows[0].password)) {
+                return response.status(403).json({message: "Password incorrect"})
+            }
+
+
+
+            const tokens = signUser(candidate.rows[0])
+
+            response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token})
+
+            // signUser({id: 0, name: "nacretion", admin: false})
+        }
+        catch (e) {
             response.status(500).json({message: "Something went wrong. Try again."})
         }
 
