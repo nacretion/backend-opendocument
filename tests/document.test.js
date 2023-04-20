@@ -99,6 +99,6 @@ describe('POST /api/document-template', () => {
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
 
-            await db.query("DELETE from users where login = $1", [login]);
+        await db.query("DELETE from users where login = $1", [login]);
     });
 })

@@ -41,7 +41,7 @@ class DocumentController {
 
             const file = files[0]
 
-            if (file.mimetype !== 'application/vnd.oasis.opendocument.text') {
+            if (!file.mimetype || file.mimetype !== 'application/vnd.oasis.opendocument.text') {
                 removeFile(file.filename)
                 return response.status(400)
                     .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
