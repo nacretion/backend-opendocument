@@ -71,7 +71,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if invalid file type provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from('test file contents'), 'test.txt')
@@ -81,7 +81,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if empty file provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from(''), 'test.odt')
