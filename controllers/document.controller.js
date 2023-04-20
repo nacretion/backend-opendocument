@@ -103,7 +103,7 @@ class DocumentController {
                 })
 
         } catch (e) {
-            response.status(500).json({message: e.message})
+            response.status(500).json({message: "Something went wrong. Try again."})
         }
 
     }

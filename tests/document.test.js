@@ -78,7 +78,6 @@ describe('POST /api/document-template', () => {
             .field('description', 'test description')
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
-        console.log(response.body)
     });
 
     it('400 if empty file provided', async () => {
@@ -89,7 +88,6 @@ describe('POST /api/document-template', () => {
             .field('description', 'test description')
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
-        console.log(response.body)
     });
 
     it('400 if invalid description provided', async () => {
