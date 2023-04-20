@@ -6,8 +6,10 @@ class DocumentController {
     async saveDocument(request, response) {
         try {
             // document saving feature
-            const bearerToken  = request.headers.authorization
-            const refreshToken  = request.cookies.refreshToken
+            const bearerToken = request.headers.authorization
+
+            // Set-Cookie: refreshToken="refreshToken"; SameSite=Strict; Secure; HttpOnly
+            const refreshToken = request.cookies.refreshToken
 
             if (!bearerToken || !refreshToken) {
                 return response.status(401).json({
@@ -18,16 +20,22 @@ class DocumentController {
             const verified = await verifyUser(bearerToken.split(" ")[1], refreshToken)
 
             if (!verified) {
-                return response.status(401).json({
-                    message: 'Ошибка аутентификации: токен недействителен'
-                });
+                return response.status(401)
+                    .cookie("refreshToken", "accessToken", ["", ""])
+                    .json({
+                        message: 'Ошибка аутентификации: токен недействителен'
+                    });
             }
 
             const files = request.files
-            if (!files) {
-                return response.status(400).json({
-                    message: 'Ошибка проверки содержимого тела запроса: отсутствует  файл'
-                });
+
+            if (!files.length) {
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                    .json({
+                        message: 'Ошибка проверки содержимого тела запроса: отсутствует  файл',
+                        token: verified.accessToken || verified.newAccessToken
+                    });
             }
 
 
@@ -35,74 +43,69 @@ class DocumentController {
 
             if (file.mimetype !== 'application/vnd.oasis.opendocument.text') {
                 removeFile(file.filename)
-                return response.status(400).json({
-                    message: 'Ошибка проверки содержимого тела запроса: неверный тип MIME файла'
-                });
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                    .json({
+                        message: 'Ошибка проверки содержимого тела запроса: неверный тип MIME файла',
+                        token: verified.accessToken || verified.newAccessToken
+                    });
             }
-            if (file.length === 0) {
+            if (file.size === 0) {
                 removeFile(file.filename)
-                return response.status(400).json({
-                    message: 'Ошибка проверки содержимого тела запроса: пустой файл'
-                });
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                    .json({
+                        message: 'Ошибка проверки содержимого тела запроса: пустой файл',
+                        token: verified.accessToken || verified.newAccessToken
+                    });
             }
 
             const description = request.body.description
 
             if (!description || description.length < 5 || description.length > 255) {
                 removeFile(file.filename)
-                return response.status(400).json({
-                    message: 'Ошибка проверки содержимого тела запроса: отсутствует поле description или его длина некорректна'
-                });
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                    .json({
+                        message: 'Ошибка проверки содержимого тела запроса: отсутствует поле description или его длина некорректна',
+                        token: verified.accessToken || verified.newAccessToken
+                    });
             }
 
-            let userId = 0;
+            let userId = await getId(verified.accessToken || verified.newAccessToken)
 
-            if (verified.accessToken) {
-                userId = await getId(verified.accessToken)
-            } else {
-                userId = await getId(verified.newAccessToken)
-            }
-            console.log(file.mimetype, file.size, file.originalname, file.filename, "./uploads/", description, userId)
             const newFile = await saveFile(file, description, userId)
 
             if (!newFile) {
-
-                return verified.accessToken?
-                    response.status(400)
-                        .cookie("refreshToken", verified.refreshToken)
-                        .json({
-                            message: "Ошибка сохранения файла",
-                            newAccessToken: verified.accessToken
-                        })
-
-                    : response.status(400)
-                        .cookie("refreshToken", verified.newRefreshToken)
-                        .json({
-                            message: "Ошибка сохранения файла",
-                            newAccessToken: verified.newAccessToken
-                        })
+                removeFile(file.filename)
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                    .json({
+                        message: "Ошибка проверки содержимого тела запроса!",
+                        token: verified.accessToken || verified.newAccessToken
+                    })
             }
-            console.log(newFile)
-
-
-            return verified.accessToken?
-                response.status(200)
-                    .cookie("refreshToken", verified.refreshToken)
+            if (newFile === "exists") {
+                removeFile(file.filename)
+                return response.status(400)
+                    .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
                     .json({
-                        newAccessToken: verified.accessToken
+                        message: "Ошибка сохранения файла",
+                        token: verified.accessToken || verified.newAccessToken
                     })
+            }
 
-                : response.status(200)
-                    .cookie("refreshToken", verified.newRefreshToken)
-                    .json({
-                        newAccessToken: verified.newAccessToken
-                    })
+            response.status(200)
+                .cookie("refreshToken", verified.refreshToken || verified.newRefreshToken)
+                .json({
+                    file: newFile,
+                    token: verified.accessToken || verified.newAccessToken
+                })
+
+        } catch (e) {
+            response.status(500).json({message: e.message})
         }
-        catch (e) {
-            console.log(e)
-            response.status(500).json({message: "Something went wrong. Try again."})
-        }
-        
+
     }
 }
 
