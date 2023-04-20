@@ -37,4 +37,5 @@ app.use(cors(corsOptions))
 app.use('/api', documentRouter)
 app.use('/api/user', userRouter)
 
-app.listen(PORT, () => console.log("started successfully on port", PORT))
+
+module.exports = app
