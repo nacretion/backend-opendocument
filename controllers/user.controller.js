@@ -1,4 +1,4 @@
-const {signUser, verifyUser, createUser, findByLogin, authUser} = require("../utils/user");
+const {signUser, createUser, findByLogin} = require("../utils/user");
 const {compare} = require("bcrypt");
 
 
@@ -27,7 +27,7 @@ class UserController {
 
             const tokens = signUser(result.rows[0])
 
-            response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token})
+            response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token, user_id: result.rows[0].id})
 
         }
         catch (e) {
