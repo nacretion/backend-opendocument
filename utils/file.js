@@ -20,14 +20,18 @@ async function removeFile(filename) {
 
 async function saveFile(file, description, userId) {
 
+    const candidate = await db.query("SELECT * FROM files where (mime_type, size, description) = ($1, $2, $3)", [file.mimetype, file.size, description])
 
-    // TODO: Проверить, существует ли файл (содержимое, описание)
-
+    if (candidate.rows && candidate.rows[0]) {
+        return "exists"
+    }
     const result = await db.query("INSERT INTO files(mime_type, size, original_name, stored_name, storage_location, description, user_id) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         [file.mimetype, file.size, file.originalname, file.filename, "./uploads/", description, userId]
     )
-    if (result.rows[0]) return result.rows[0]
-    else return undefined
+
+    if (!result.rows[0]) return undefined
+
+    return result.rows[0]
 
 }
 
