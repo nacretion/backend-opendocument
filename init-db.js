@@ -62,15 +62,15 @@ connection.query(`DROP DATABASE ${dbName}`, () => {
             if (error) throw error;
 
             console.log('Table "users" created successfully');
+            newConnection.query(filesTableQuery, function (error) {
+                if (error) throw error;
 
+                console.log('Table "files" created successfully');
+
+                newConnection.end();
+                connection.end();
+            });
         });
-        newConnection.query(filesTableQuery, function (error) {
-            if (error) throw error;
 
-            console.log('Table "files" created successfully');
-
-            newConnection.end();
-            connection.end();
-        });
     });
 })
