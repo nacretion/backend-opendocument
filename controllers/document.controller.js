@@ -1,4 +1,4 @@
-const {signUser, verifyUser, verifyToken, getId} = require("../utils/user");
+const {verifyUser, getId} = require("../utils/user");
 const {removeFile, saveFile} = require("../utils/file");
 
 class DocumentController {

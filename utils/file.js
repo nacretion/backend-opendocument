@@ -3,7 +3,7 @@ const db = require("../database");
 
 
 async function removeFile(filename) {
-    await rm("./uploads/" + filename, (err, res) => {
+    await rm("./uploads/" + filename, (err) => {
         if (err) throw err
     })
 }

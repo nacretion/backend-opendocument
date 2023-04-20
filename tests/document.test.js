@@ -1,6 +1,5 @@
 const request = require('supertest');
 const app = request(require('../app'));
-const {saveFile, removeFile} = require('../utils/file');
 const {signUser} = require('../utils/user');
 
 
@@ -38,7 +37,7 @@ describe('POST /api/document-template', () => {
 
 
     it('401 if no auth token provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .attach('file', file.buffer)
             .field('description', 'test description')
@@ -46,7 +45,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('401 if invalid auth token provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', 'Bearer invalid-token')
             .attach('file', file.buffer)
@@ -55,7 +54,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if no file provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .field('description', 'test description')
@@ -64,7 +63,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if invalid file type provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from('test file contents'), 'test.txt')
@@ -74,7 +73,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if empty file provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from(''), 'test.odt')
@@ -84,7 +83,7 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if invalid description provided', async () => {
-        const response = await app
+        await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', file.buffer)

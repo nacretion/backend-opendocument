@@ -1,7 +1,5 @@
 const request = require('supertest');
 const app = request(require('../app'));
-const {saveFile, removeFile} = require('../utils/file');
-const {signUser} = require('../utils/user');
 const db = require('../database')
 
 const registerPath = '/api/user/register'
@@ -11,7 +9,7 @@ describe('POST ' + registerPath, () => {
     const login = "testUser", password = "testPassword", name = "testName"
 
     it("user can be created",async () => {
-        const response = await app
+        await app
             .post(registerPath)
             .field('login', login)
             .field('password', password)
@@ -21,17 +19,17 @@ describe('POST ' + registerPath, () => {
 
 
     it('400 if some fields are blank', async () => {
-        const noLogin = await app
+        await app
             .post(registerPath)
             .field('password', password)
             .field('name', name)
             .expect(400)
-        const noPassword = await app
+        await app
             .post(registerPath)
             .field('login', login)
             .field('name', name)
             .expect(400)
-        const noName = await app
+        await app
             .post(registerPath)
             .field('login', login)
             .field('password', password)
@@ -40,7 +38,7 @@ describe('POST ' + registerPath, () => {
     });
 
     it('409 if user already exists', async () => {
-        const response = await app
+        await app
             .post(registerPath)
             .field('login', login)
             .field('password', password)
