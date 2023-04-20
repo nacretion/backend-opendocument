@@ -71,23 +71,25 @@ describe('POST /api/document-template', () => {
     });
 
     it('400 if invalid file type provided', async () => {
-        await app
+        const response = await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from('test file contents'), 'test.txt')
             .field('description', 'test description')
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
+        console.log(response.body)
     });
 
     it('400 if empty file provided', async () => {
-        await app
+        const response = await app
             .post('/api/document-template')
             .set('Authorization', `Bearer ${accessToken}`)
             .attach('file', Buffer.from(''), 'test.odt')
             .field('description', 'test description')
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
+        console.log(response.body)
     });
 
     it('400 if invalid description provided', async () => {
