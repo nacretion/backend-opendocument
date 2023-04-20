@@ -40,12 +40,11 @@ const connection = new Pool({
     port: dbPort
 });
 
-connection.query(`DROP DATABASE ${dbName}`, (error, results) => {
-    if (error) throw error;
+connection.query(`DROP DATABASE ${dbName}`, () => {
 
     console.log("Database deleted successfully")
 
-    connection.query(`CREATE DATABASE ${dbName}`, function (error, results) {
+    connection.query(`CREATE DATABASE ${dbName}`, function (error) {
         if (error) throw error;
 
         console.log('Database created successfully');
@@ -59,13 +58,13 @@ connection.query(`DROP DATABASE ${dbName}`, (error, results) => {
         })
         console.log(`Using database: "${dbName}"`);
 
-        newConnection.query(userTableQuery, function (error, results) {
+        newConnection.query(userTableQuery, function (error) {
             if (error) throw error;
 
             console.log('Table "users" created successfully');
 
         });
-        newConnection.query(filesTableQuery, function (error, results) {
+        newConnection.query(filesTableQuery, function (error) {
             if (error) throw error;
 
             console.log('Table "files" created successfully');
