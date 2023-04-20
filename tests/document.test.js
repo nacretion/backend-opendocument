@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = request(require('../app'));
 const {signUser} = require('../utils/user');
+const db = require("../database");
 
 
 describe('POST /api/document-template', () => {
@@ -10,12 +11,19 @@ describe('POST /api/document-template', () => {
     let userId;
     let file;
 
+    const login = "testUser", password = "testPassword", name = "testName"
+
     beforeAll(async () => {
+        const response = await app
+            .post("/api/user/register")
+            .field('login', login)
+            .field('password', password)
+            .field('name', name)
+
         const user = {
-            id: 6,
-            email: 'test@example.com',
-            password: 'password',
-        };
+            id: response.body.id
+        }
+
         const tokens = await signUser(user);
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
@@ -91,4 +99,7 @@ describe('POST /api/document-template', () => {
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
     });
+    afterAll(async () => {
+        await db.query("DELETE from users where login = $1", [login]);
+    })
 })
