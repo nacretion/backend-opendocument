@@ -27,7 +27,6 @@ class UserController {
 
             const tokens = signUser(result.rows[0])
 
-            console.log(tokens)
             response.status(200).cookie("refreshToken", tokens.refreshToken).json({token: tokens.token})
 
         }

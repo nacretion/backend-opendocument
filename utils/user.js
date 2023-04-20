@@ -8,7 +8,6 @@ const {hash} = require("bcrypt");
 async function createUser(name, admin = false, login, password) {
     const hashedPassword = await hash(password, salt)
 
-    console.log(hashedPassword)
     const user = [name, admin, login, hashedPassword]
 
     return await db.query("INSERT INTO users(name, admin, login, password) VALUES ($1, $2, $3, $4) returning *", user)
@@ -54,7 +53,6 @@ async function verifyUser(accessToken, refreshToken) {
         return decoded
     });
 
-    console.log(accessValid)
     if (accessValid) return {accessToken, refreshToken}
 
     const newToken = await renewToken(refreshToken)

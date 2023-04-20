@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const documentRouter = require("./routes/document.routes")
 const userRouter = require("./routes/user.routes")
 
-const {PORT} = require("./config");
 const app = express()
 
 const storage = multer.diskStorage({
@@ -22,18 +21,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage})
 
+
 app.use(upload.any())
 app.use(cookieParser());
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
 app.use(express.static('client'))
 
+app.use(express.urlencoded({ limit: "1kb", extended: true }));
+app.use(express.json({ limit: "1kb" }));
 const corsOptions = {origin: "*"}
 
 app.use(cors(corsOptions))
 
 
 app.use('/api', documentRouter)
-app.use('/api', userRouter)
+app.use('/api/user', userRouter)
 
 app.listen(PORT, () => console.log("started successfully on port", PORT))
