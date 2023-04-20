@@ -98,8 +98,7 @@ describe('POST /api/document-template', () => {
             .field('description', 'a')
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(400)
+
+            await db.query("DELETE from users where login = $1", [login]);
     });
-    afterAll(async () => {
-        await db.query("DELETE from users where login = $1", [login]);
-    })
 })
