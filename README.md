@@ -1,5 +1,5 @@
 # Getting started with backend-opendocument
-## you can test this API following this [link](https::/opendocument.nacretion.space)
+## you can test this API following this [link](https://opendocument.nacretion.space)
 
 ## Usage
 In the project directory, you should to:
